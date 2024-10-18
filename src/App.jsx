@@ -8,7 +8,7 @@ function App() {
 
   return (
     <>
-      <h1 align="center">Task Manager App </h1>
+      <h1 align="center" className='text-3xl'>Task Manager App </h1>
 
 
 
