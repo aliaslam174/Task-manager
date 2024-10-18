@@ -3,6 +3,8 @@ import { useState } from 'react'
 import './App.css'
 import { useSelector } from 'react-redux'
 import { Route, Routes } from 'react-router-dom'
+import Login from './compnent/Login'
+import Signup from './compnent/Signup'
 
 
 function App() {
@@ -14,9 +16,9 @@ function App() {
       <h1 align="center" className='text-3xl'>Task Manager App </h1>
 
 
-
       <Routes>
-        <Route/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/signup' element={<Signup/>}/>
       </Routes>
     </>
   )
