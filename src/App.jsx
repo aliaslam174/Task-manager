@@ -5,19 +5,16 @@ import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import Login from './compnent/Login'
 import Signup from './compnent/Signup'
-import Dashbord from './compnent/dashbord/Dashbord'
+import Admindashboard from './compnent/dashbord/Admindashboard'
 import AuthGurd from './compnent/Authgurd'
 import Home from './compnent/Home'
+import Userdashboard from './compnent/dashbord/Userdashboard'
+import ProfileManagement from './compnent/dashbord/profile/ProfileManagement'
 
 
 function App() {
-  // const { isAuthenticated } = useSelector((state) => state.auth);
-  // const navigate = useNavigate()
-  // if (isAuthenticated) {
-  //   useEffect(()=>{
-  //       navigate("/dashbord")
-  //   },[]);
-  // }
+  const { isAuthenticated,role } = useSelector((state) => state.auth);
+
   return (
     <>
    
@@ -27,8 +24,12 @@ function App() {
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        <Route path='/admin/profile' element={<ProfileManagement/>}/>
         
-        <Route path='/dashbord' element={<AuthGurd> <Dashbord /></AuthGurd>
+        <Route path='/dashbord' element={<AuthGurd> 
+          {role==="admin"?<Admindashboard />:<Userdashboard/>}
+          
+          </AuthGurd>
           }
         />
       </Routes>

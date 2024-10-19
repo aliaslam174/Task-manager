@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom';
 import { login } from '../features/Loginslice';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { notification } from 'antd';
 function Login() {
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +18,19 @@ function Login() {
   };
 
   if(isAuthenticated === true) {
-    return <Navigate to='/dashbord' replace />;
+
+ notification.success({
+        message: 'Login Successful',
+        description: 'Welcome back! You are now logged in.',
+        placement: 'topRight',
+        duration: 1,  // Auto-close after 3 seconds
+      });
+
+   return <Navigate to='/dashbord' replace />;
+ 
+    
+    
+    
 }
   return (
     <div className='mt-8 content-center w-full mb-10'>

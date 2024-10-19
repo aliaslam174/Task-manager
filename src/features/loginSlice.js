@@ -14,6 +14,7 @@ export const login = createAsyncThunk(
   }
 );
 
+
 const loginSlice = createSlice({
   name: 'auth',
   initialState:{
@@ -22,6 +23,7 @@ const loginSlice = createSlice({
     isAuthenticated: false,
     loading: false,
     error: null,
+    role:null
   },
   reducers: {
     logout: (state) => {
@@ -30,6 +32,7 @@ const loginSlice = createSlice({
       state.token = null;
       state.error = null;
     },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -40,11 +43,12 @@ const loginSlice = createSlice({
       })
       // Handle the fulfilled state when login is successful
       .addCase(login.fulfilled, (state, action) => {
-   
+   console.log(action.payload.data.user.role)
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.data.user;
         state.token = action.payload.data.token;
+        state.role = action.payload.data.user.role;
         state.error = null;
       })
       // Handle the rejected state when login fails
