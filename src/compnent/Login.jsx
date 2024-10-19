@@ -1,10 +1,25 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { login } from '../features/Loginslice';
+import { useDispatch, useSelector } from 'react-redux';
 
 function Login() {
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setError] = useState('');
+
+  const dispatch = useDispatch();
+  const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(login({ email, password })); // Dispatch login action
+  };
+
+  if(isAuthenticated === true) {
+    return <Navigate to='/dashbord' replace />;
+}
   return (
     <div className='mt-8 content-center w-full mb-10'>
         <div className='w-[80vw] md:w-[40vw]  flex flex-col content-center m-auto'>
@@ -60,11 +75,12 @@ function Login() {
             {error && <div className='text-red-500 mt-2'>{error}</div>}
 
             <div>
-              <button
+              <button onClick={handleSubmit}
                 type='submit'
+                disabled={loading}
                 className='border-solid w-full border pt-[12px] pb-[12px] ps-[16px] pe-[16px] rounded-[8px] mt-3 mb-3 font-normal text-[14px] bg-[#23272E] text-[#fff]'
               >
-                Sign in
+               {loading ? 'Logging in...' : 'Sign In'}
               </button>
             </div>
 
