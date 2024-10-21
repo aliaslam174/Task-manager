@@ -10,6 +10,7 @@ import AuthGurd from './compnent/Authgurd'
 import Home from './compnent/Home'
 import Userdashboard from './compnent/dashbord/Userdashboard'
 import ProfileManagement from './compnent/dashbord/profile/ProfileManagement'
+import KanbanBoard from './compnent/kanbanboard/KanbanBoard'
 
 
 function App() {
@@ -24,10 +25,10 @@ function App() {
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
-        <Route path='/admin/profile' element={<ProfileManagement/>}/>
-        
+        {/* <Route path='/admin/profile' element={<ProfileManagement/>}/> */}
         <Route path='/dashbord' element={<AuthGurd> 
-          {role==="admin"?<Admindashboard />:<Userdashboard/>}
+          <Admindashboard/>
+          {/* {role==="admin"?<Admindashboard />:<Userdashboard/>} */}
           
           </AuthGurd>
           }

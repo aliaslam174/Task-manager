@@ -23,7 +23,8 @@ const loginSlice = createSlice({
     isAuthenticated: false,
     loading: false,
     error: null,
-    role:null
+    role:null,
+    totaluser:null
   },
   reducers: {
     logout: (state) => {
@@ -32,6 +33,21 @@ const loginSlice = createSlice({
       state.token = null;
       state.error = null;
     },
+    totaluser: (state,action) => {
+      console.log(action.payload)
+      state.totaluser = action.payload;
+    },
+    updateUserState(state, action) {
+      console.log("updatestate",action.payload)
+      state.user = action.payload.data;
+      // Ensure payload structure is correct
+      // if (action.payload?.data) {
+      //   state.user = { ...state.user, ...action.payload.data };
+      // } else {
+      //   console.error("Payload does not contain 'data':", action.payload);
+      // }
+    },
+  
     
   },
   extraReducers: (builder) => {
@@ -59,5 +75,5 @@ const loginSlice = createSlice({
   }
 });
 
-export const { logout } = loginSlice.actions;
+export const { logout,updateUserState ,totaluser} = loginSlice.actions;
 export default loginSlice.reducer;
