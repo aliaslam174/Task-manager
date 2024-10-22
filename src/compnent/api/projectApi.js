@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const projectApi = createApi({
   reducerPath: 'projectApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://task-manager.codionslab.com/api/v1/',
+    baseUrl: 'https://task-manager.codionslab.com/api/v1/admin/',
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token;
       if (token) {
