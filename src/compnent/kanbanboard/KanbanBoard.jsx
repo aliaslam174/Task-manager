@@ -369,7 +369,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
           due_date: movedTask.due_date, // Set the due date if applicable, otherwise send null
           status: newStatus
         };
-        await axios.put(
+     const update=   await axios.put(
           `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task/${taskId}`,
           updatedTaskData,
           {
@@ -378,7 +378,29 @@ const KanbanBoard = ({ selectedProjectId }) => {
             },
           }
         );
-        notification.success({ message: 'Task status updated successfully!' });
+        const statusupdate = update.data.data.status;
+        if (statusupdate === 'todo') {
+          notification.success({
+            message: 'Task is in "To Do" status!',
+            duration: 1, // Notification stays for 5 seconds
+          });
+        } else if (statusupdate === 'in-progress') {
+          notification.success({
+            message: 'Task status updated to "In Progress"!',
+            duration: 1, // Stays for 3 seconds
+          });
+        } else if (statusupdate === 'completed') {
+          notification.success({
+            message: 'Task status updated to "Completed"!',
+            duration: 1, // Stays for 10 seconds
+          });
+        } else {
+          notification.warning({
+            message: 'Unknown status!',
+            duration: 5, // Stays for 7 seconds
+          });
+        }
+        
       } catch (error) {
         console.error("Error updating task status:", error);
         notification.error({ message: 'Failed to update task status!' });
