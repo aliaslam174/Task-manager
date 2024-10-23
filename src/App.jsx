@@ -25,9 +25,11 @@ function App() {
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
+        {/* <Route path="/dashbord/kanbanbord" element={<KanbanBoard/>}/> */}
         {/* <Route path='/admin/profile' element={<ProfileManagement/>}/> */}
         <Route path='/dashbord' element={<AuthGurd> 
           <Admindashboard/>
+          
           {/* {role==="admin"?<Admindashboard />:<Userdashboard/>} */}
           
           </AuthGurd>

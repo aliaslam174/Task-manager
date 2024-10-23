@@ -1,50 +1,321 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Card, Button, Input } from 'antd';
-
+import { Card, Button, Input, Form, DatePicker, notification, Select, Modal } from 'antd';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import dell from "../../image/dell.svg"
+import line from "../../image/line.svg"
 // Sample initial task data for columns
-const initialData = {
-  tasks: {
-    'task-1': { id: 'task-1', content: 'Set up project' },
-    'task-2': { id: 'task-2', content: 'Design database schema' },
-    'task-3': { id: 'task-3', content: 'Develop API endpoints' },
-    'task-4': { id: 'task-4', content: 'Test API' },
-  },
-  columns: {
-    'column-1': {
-      id: 'column-1',
-      title: 'To Do',
-      taskIds: ['task-1', 'task-2'],
-    },
-    'column-2': {
-      id: 'column-2',
-      title: 'In Progress',
-      taskIds: ['task-3'],
-    },
-    'column-3': {
-      id: 'column-3',
-      title: 'Completed',
-      taskIds: ['task-4'],
-    },
-  },
-  columnOrder: ['column-1', 'column-2', 'column-3'],
-};
+const KanbanBoard = ({ selectedProjectId }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [taskModal, setTaskModal] = useState(false);
+  const [taskData, setTaskData] = useState("");
 
-const KanbanBoard = () => {
+  const initialData = {
+    tasks: {
+      'task-1': { id: 'task-1', content: 'Set up project' },
+      'task-2': { id: 'task-2', content: 'Design database schema' },
+      'task-3': { id: 'task-3', content: 'Develop API endpoints' },
+      'task-4': { id: 'task-4', content: 'Test API' },
+    },
+    columns: {
+      'column-1': {
+        id: 'column-1',
+        title: 'To Do',
+        taskIds: ['task-1', 'task-2'],
+      },
+      'column-2': {
+        id: 'column-2',
+        title: 'In Progress',
+        taskIds: ['task-3'],
+      },
+      'column-3': {
+        id: 'column-3',
+        title: 'Completed',
+        taskIds: ['task-4'],
+      },
+    },
+    columnOrder: ['column-1', 'column-2', 'column-3'],
+  };
+
   const [boardData, setBoardData] = useState(initialData);
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const { token } = useSelector((state) => state.auth);
+  console.log(boardData)
+  // Function to show the modal
 
-  const onDragEnd = (result) => {
+
+  const addSubtask = async (subtask) => {
+    const  realTaskId= subtask.id.split('-')[1]; // Extract real task ID
+    const { content: name, des: description, due_date} = subtask;
+    console.log("sub task",subtask)
+   
+    console.log(realTaskId)
+
+     // Check if the realTaskId is valid
+  if (!realTaskId) {
+    console.error('Error: parent task ID is null or undefined.');
+    notification.error({ message: 'Invalid parent task ID. Unable to add subtask!' });
+    return;
+  }
+
+  const subtaskData = {
+    name ,
+    description,
+    due_date,
+    status:"",// Set default status for subtask
+    parent_id: realTaskId // Ensure parent ID is sent correctly
+  };
+ 
+    try {
+      const response = await axios.post(
+        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+        subtaskData,  // Add subtask data
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const newSubtask = response.data.data;
+  
+      // Update the board with the new subtask
+      setBoardData((prevData) => {
+        const newSubtaskId = `subtask-${newSubtask.id}`;
+        const updatedTask = {
+          ...prevData.tasks[taskId],
+          subtasks: [...prevData.tasks[taskId].subtasks, { id: newSubtaskId, content: newSubtask.name }],
+        };
+  
+        return {
+          ...prevData,
+          tasks: {
+            ...prevData.tasks,
+            [taskId]: updatedTask,
+          },
+        };
+      });
+  
+      notification.success({ message: 'Subtask added successfully!' });
+    } catch (error) {
+      console.error('Error adding subtask:', error);
+      notification.error({ message: 'Failed to add subtask!' });
+    }
+  };
+  const showModal = (subtask) => {
+   
+    // addSubtask(subtask)
+    setIsModalVisible(true);
+  };
+
+  // Function to handle modal cancellation
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setTaskModal(false)
+    form.resetFields(); // Reset form fields when modal is closed
+  };
+
+  const cancelTaskModal = () => {
+    setTaskModal(false);
+  };
+
+  const openTaskModal = (content) => {
+    console.log("taskcontent", content)
+    setTaskData(content);
+    setTaskModal(true)
+    setTaskModal(true);
+  };
+
+  // Function to handle task addition
+  const addTask = async (values) => {
+    console.log(values)
+    const { name, description, due_date } = values; // Assume parent_id comes from the form
+    const status = 'todo'; // Default status
+
+    setLoading(true);
+
+    try {
+      // Prepare the data to be sent
+      const taskData = {
+        name,
+        description,
+        due_date,
+        status,
+      };
+
+      // Make a POST request to add a new task
+      const response = await axios.post(
+        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+        taskData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,  // Add token to Authorization header
+          },
+        }
+      );
+
+      const newTask = response.data.data; // Assuming the new task details are in the response
+
+      // Add new task to the board data
+      setBoardData((prevData) => {
+        const newTaskId = `task-${newTask.id}`;
+        return {
+          ...prevData,
+          tasks: {
+            ...prevData.tasks,
+            [newTaskId]: { id: newTaskId, content: newTask.name },
+          },
+          columns: {
+            ...prevData.columns,
+            'column-1': {
+              ...prevData.columns['column-1'],
+              taskIds: [...prevData.columns['column-1'].taskIds, newTaskId],
+            },
+          },
+        };
+      });
+
+
+      
+      notification.success({ message: 'Task added successfully!' });
+      handleCancel(); // Close the modal after successful submission
+    } catch (error) {
+      notification.error({ message: 'Failed to add task!' });
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteTask = async (taskId) => {
+
+
+    const taskRealId = taskId.split('-')[1]; // Extract the real task ID if needed
+    console.log(taskRealId)
+
+    try {
+      await axios.delete(
+        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task/${taskRealId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Remove the task from the board data after successful deletion
+      setBoardData((prevData) => {
+        const { [taskId]: removedTask, ...remainingTasks } = prevData.tasks;
+
+        // Remove task from columns
+        const newColumns = { ...prevData.columns };
+        Object.keys(newColumns).forEach((columnId) => {
+          newColumns[columnId].taskIds = newColumns[columnId].taskIds.filter(id => id !== taskId);
+        });
+
+        return {
+          ...prevData,
+          tasks: remainingTasks,
+          columns: newColumns,
+        };
+      });
+
+      notification.success({ message: 'Task deleted successfully!' });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      notification.error({ message: 'Failed to delete task!' });
+    }
+  };
+ 
+  
+  
+  // Fetch tasks by project
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // Process the response to fit into your board data structure
+        const fetchedTasks = response.data.data;
+        const newTasks = {};
+        const newColumns = {
+          'column-1': { id: 'column-1', title: 'To Do', taskIds: [] },
+          'column-2': { id: 'column-2', title: 'In Progress', taskIds: [] },
+          'column-3': { id: 'column-3', title: 'Completed', taskIds: [] },
+        };
+
+        fetchedTasks.forEach((task) => {
+          const taskId = `task-${task.id}`; // Ensure unique ID format
+          newTasks[taskId] = {
+            id: taskId,
+            content: task.name,
+            des: task.description, // Capture description
+            due_date: task.due_date // Capture due date
+          };
+
+          // Add task to appropriate column based on its status
+          if (task.status === 'todo') {
+            newColumns['column-1'].taskIds.push(taskId);
+          } else if (task.status === 'in-progress') {
+            newColumns['column-2'].taskIds.push(taskId);
+          } else if (task.status === 'completed') {
+            newColumns['column-3'].taskIds.push(taskId);
+          }
+        });
+
+        setBoardData({
+          tasks: newTasks,
+          columns: newColumns,
+          columnOrder: ['column-1', 'column-2', 'column-3'],
+        });
+
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        notification.error({ message: 'Failed to fetch tasks!' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [selectedProjectId, token]);
+
+
+  const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
 
+    // If the task is dropped in the same position
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
     const startColumn = boardData.columns[source.droppableId];
     const endColumn = boardData.columns[destination.droppableId];
 
+    // Get the current task from the tasks object
+    const movedTask = boardData.tasks[draggableId];
+
+    // Determine the new status based on the column ID
+    let newStatus;
+    if (endColumn.id === 'column-1') {
+      newStatus = 'todo';
+    } else if (endColumn.id === 'column-2') {
+      newStatus = 'in-progress';
+    } else if (endColumn.id === 'column-3') {
+      newStatus = 'completed';
+    }
+    console.log(startColumn)
     if (startColumn === endColumn) {
       const newTaskIds = Array.from(startColumn.taskIds);
+      console.log(newTaskIds)
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
 
@@ -74,7 +345,7 @@ const KanbanBoard = () => {
         ...endColumn,
         taskIds: endTaskIds,
       };
-
+      console.log(newStatus)
       setBoardData({
         ...boardData,
         columns: {
@@ -83,31 +354,117 @@ const KanbanBoard = () => {
           [newEndColumn.id]: newEndColumn,
         },
       });
+
+      const taskId = movedTask.id.split('-')[1];
+
+      // Update the task's status on the server using the correct API endpoint
+
+      console.log(movedTask)
+      try {
+
+        // Prepare the updated task data
+        const updatedTaskData = {
+          name: movedTask.content, // Assuming content is the task name
+          description: movedTask.des, // Ensure you have a description in movedTask
+          due_date: movedTask.due_date, // Set the due date if applicable, otherwise send null
+          status: newStatus
+        };
+        await axios.put(
+          `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task/${taskId}`,
+          updatedTaskData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        notification.success({ message: 'Task status updated successfully!' });
+      } catch (error) {
+        console.error("Error updating task status:", error);
+        notification.error({ message: 'Failed to update task status!' });
+      }
     }
   };
 
   return (
     <>
-    
-    <h2 align="center">Kanban Board</h2>
-    <div className="kanban-board">
-     
-      <DragDropContext onDragEnd={onDragEnd}>
-        {boardData.columnOrder.map((columnId) => {
-          const column = boardData.columns[columnId];
-          const tasks = column.taskIds.map((taskId) => boardData.tasks[taskId]);
+      <h2 align="center">Kanban Board</h2>
+      <Button type="primary" onClick={showModal} style={{ marginBottom: '16px' }}>
+        Add Task
+      </Button>
+      {/* New Task Modal */}
+      <Modal title="Add a new task" visible={isModalVisible} onCancel={handleCancel} footer={null}>
+        <Form form={form} onFinish={addTask}>
+          <Form.Item name="name" label="Task Name" rules={[{ required: true, message: 'Please input the task name!' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item name="due_date" label="Due Date">
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="status" label="Status" initialValue="todo">
+            <Select>
+              <Select.Option value="todo">To Do</Select.Option>
+              <Select.Option value="in_progress">In Progress</Select.Option>
+              <Select.Option value="completed">Completed</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item>
 
-          return (
-            <Droppable key={column.id} droppableId={column.id}>
-              {(provided) => (
-                <div
-                  className="kanban-column"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  style={{ margin: '8px', border: '1px solid lightgrey', borderRadius: '4px', width: '300px', display: 'inline-block' }}
-                >
-                  <h3 style={{ padding: '8px' }}>{column.title}</h3>
-                  <div style={{ padding: '8px' }}>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Add Task
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+
+      {/* taskdetail modal */}
+      <div className='bg-gray-400'>
+        <Modal className="custom-modal" open={taskModal} onCancel={handleCancel} footer={null}>
+          <div className='grid grid-cols-2'>
+            <div className=''>  <h1 className='text-xl font-bold'>Task Name: {taskData.content}</h1>
+              <h1 className='text-xl font-medium mt-5 text-gray-500'>Description</h1>
+              <p>{taskData.des}</p>
+              <div className='subtask'>
+                <h2 className='font-bold '>SubTask</h2>
+                <Button className='my-5' onClick={()=>{showModal(taskData)}}>Add</Button>
+              </div>
+            </div>
+
+
+            <div className=''> <h1 className='text-xl font-bold'>Comment</h1></div>
+
+          </div>
+
+        </Modal>
+      </div>
+
+      {/* Kanban Board */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div style={{ display: 'flex' }}>
+          {boardData.columnOrder.map((columnId) => {
+            const column = boardData.columns[columnId];
+            const tasks = column.taskIds.map((taskId) => boardData.tasks[taskId]);
+
+            return (
+              <Droppable key={column.id} droppableId={column.id}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    style={{
+                      border: '1px solid lightgrey',
+                      borderRadius: '10px',
+                      width: '300px',
+                      margin: '8px',
+                      padding: '16px',
+                      background: 'transparent',
+                    }}
+                  >
+                    <h3>{column.title}</h3>
                     {tasks.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id} index={index}>
                         {(provided) => (
@@ -116,28 +473,36 @@ const KanbanBoard = () => {
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             style={{
-                              padding: '16px',
-                              marginBottom: '8px',
-                              backgroundColor: 'white',
-                              borderRadius: '4px',
+                              userSelect: 'none',
+                              padding: '6px',
+                              margin: '0 0 8px 0',
+                              minHeight: '50px',
+                              background: 'white',
                               border: '1px solid lightgrey',
+                              borderRadius: '10px',
+                              color: 'black',
+                              cursor: "pointer",
                               ...provided.draggableProps.style,
                             }}
+                          // Handle task click to open modal
                           >
-                            <Card>{task.content}</Card>
+
+                            {task.content}
+
+                            <div className='flex justify-between'> <div><img width="15px" onClick={() => openTaskModal(task)} src={line} alt="" /></div>
+                              <div className='test-end'><img width="15px" onClick={() => { deleteTask(task.id) }} src={dell} alt="" /></div></div>
                           </div>
                         )}
                       </Draggable>
                     ))}
                     {provided.placeholder}
                   </div>
-                </div>
-              )}
-            </Droppable>
-          );
-        })}
+                )}
+              </Droppable>
+            );
+          })}
+        </div>
       </DragDropContext>
-    </div>
     </>
   );
 };

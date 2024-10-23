@@ -45,7 +45,7 @@ export const projectApi = createApi({
       query: ({ projectId, userId }) => ({
         url: `project/${projectId}/assign`,
         method: 'POST',
-        body: { user_id: userId },
+        body: { user_ids: [userId] },
       }),
       invalidatesTags: ['Project'],
     }),

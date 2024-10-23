@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Input, notification, Spin, Select } from 'antd';
-import { useFetchProjectsQuery, useCreateProjectMutation, useUpdateProjectMutation, useDeleteProjectMutation, useAssignProjectMutation } from '../../../api/projectApi';
 import { useFetchUsersQuery } from '../../../api/Getalluserapi';
+import { useFetchProjectsQuery, useCreateProjectMutation, useUpdateProjectMutation, useDeleteProjectMutation, useAssignProjectMutation } from '../../../api/projectApi';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
+import KanbanBoard from '../../../kanbanboard/KanbanBoard';
+
 
 const ProjectManagement = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -10,6 +15,7 @@ const ProjectManagement = () => {
   const [assigningProject, setAssigningProject] = useState(null)
   const [isFetchingUsers, setIsFetchingUsers] = useState(false);
   const [userPage, setUserPage] = useState(1)
+  const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [form] = Form.useForm();
   const [assignForm] = Form.useForm(); // Form for assigning project
   const [allUsers, setAllUsers] = useState([])
@@ -17,7 +23,11 @@ const ProjectManagement = () => {
   const [createProject] = useCreateProjectMutation();
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject] = useDeleteProjectMutation();
-  console.log(userPage)
+  
+  // states page
+  const [board, setBoard] = useState(false)
+  const [project, setProject] = useState(true)
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -27,8 +37,9 @@ const ProjectManagement = () => {
   const projects = data?.data?.data || [];
   const totalProjects = data?.data?.total || 0; // Total number of projects
   const users = usersData?.data?.data || []; // Assuming API returns users arrays
-  console.log(usersData)
-  console.log(users)
+  const [selectedProject, setSelectedProject] = useState(null);
+ 
+  const { user, token } = useSelector((state) => state.auth);
   // Open modal for creating or updating project
   const openModal = (project = null) => {
     setEditingProject(project);
@@ -97,28 +108,49 @@ const ProjectManagement = () => {
     }
   };
 
- // Handle user search input
- const handleSearch = (value) => {
-  setSearchTerm(value); // Update search term
-  setAllUsers([]); // Reset the user list
-  setUserPage(1); // Reset the page number
-  refetchUsers(); // Refetch users based on search term
-};
+  // Handle user search input
+  const handleSearch = (value) => {
+    setSearchTerm(value); // Update search term
+    setAllUsers([]); // Reset the user list
+    setUserPage(1); // Reset the page number
+    refetchUsers(); // Refetch users based on search term
+  };
 
 
   // Handle project assignment to a user
   const handleAssignProject = async (values) => {
     try {
       const { userId } = values;
-      await useAssignProjectMutation({ projectId: assigningProject.id, userId }).unwrap(); // Assign project
+
+      // Check if assigningProject is valid
+      if (!assigningProject || !assigningProject.id) {
+        throw new Error('Project not selected or invalid');
+      }
+
+      // console.log('Assigning project:', assigningProject);
+
+      // Make the Axios POST request
+      const response = await axios.post(`https://task-manager.codionslab.com/api/v1/admin/project/${assigningProject.id}/assign`, {
+        user_ids: userId,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,  // Add token to Authorization header
+          // You can add other headers as needed
+        }
+      });
+
+      // console.log(response.data);
+
       notification.success({ message: 'Project assigned successfully!' });
       setIsAssignModalVisible(false);
-      refetch(); // Refetch projects after assignment
+      refetch();
       assignForm.resetFields();
     } catch (error) {
-      notification.error({ message: 'Error', description: 'Failed to assign project.' });
+      console.error('Error assigning project:', error);
+      notification.error({ message: 'Error', description: error.message || 'Failed to assign project.' });
     }
   };
+
 
   // Handle table pagination
   const handleTableChange = (pagination) => {
@@ -130,6 +162,16 @@ const ProjectManagement = () => {
 
   if (error) return <div>Error loading projects</div>;
 
+
+  // row click
+  const onRowClick = (record, e) => {
+    // console.log(record)
+   
+    setSelectedProjectId(record); // Set the clicked project's ID
+    setBoard(true);
+    setProject(false) // Show the Kanban board
+    // Navigate to Kanban board for the clicked project
+  };
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
     { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -139,29 +181,50 @@ const ProjectManagement = () => {
       key: 'actions',
       render: (text, record) => (
         <>
+
           <Button type="primary" onClick={() => openModal(record)}>Edit</Button>
-          <Button type="danger" onClick={() => handleDelete(record.id)} style={{ marginLeft: '10px' }}>Delete</Button>
-          <Button type="default" onClick={() => openAssignModal(record)} style={{ marginLeft: '10px' }}>Assign</Button> {/* Button to open assign modal */}
+          <Button type="danger bg-red-600 text-white " onClick={() => handleDelete(record.id)} style={{ marginLeft: '10px' }}>Delete</Button>
+          <Button type="default bg-green-500 text-white" onClick={() => openAssignModal(record)} style={{ marginLeft: '10px' }}>Assign</Button> {/* Button to open assign modal */}
+          <Button type="default bg-blue-400 text-white" onClick={() => onRowClick(record)} style={{ marginLeft: '10px' }}>Show</Button> {/* Button to open assign modal */}
         </>
       ),
     },
   ];
-
+  
   return (
     <div className="w-[80%] mx-auto mt-10">
-      <h2 className="text-2xl font-bold text-center mb-6">Project Management</h2>
-      <Button type="primary" onClick={() => openModal(null)} style={{ marginBottom: '20px' }}>Create Project</Button>
-      <Table
-        columns={columns}
-        dataSource={projects}
-        rowKey={(record) => record.id}
-        pagination={{
-          current: currentPage, // Current page
-          pageSize: pageSize, // Page size
-          total: totalProjects, // Total number of projects
-          onChange: handleTableChange, // Handle page change
-        }}
-      />
+
+      {
+        board ? <KanbanBoard selectedProjectId={selectedProjectId} /> : null
+      }
+
+      {
+        project ? (<>
+
+          <Button type="primary" onClick={() => openModal(null)} style={{ marginBottom: '20px' }}>
+            Create Project
+          </Button>
+         
+          <Table
+
+            columns={columns}
+            dataSource={projects}
+            rowKey={(record) => record.id}
+            
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: totalProjects,
+              onChange: handleTableChange,
+            }}
+          />
+
+        </>) : null
+
+
+      }
+
+
 
       <Modal
         title={editingProject ? 'Edit Project' : 'Create Project'}
@@ -198,9 +261,9 @@ const ProjectManagement = () => {
               onSearch={handleSearch} // Handle search input
               onPopupScroll={handleScroll} allowClear >
               {users.map(user => (
-                console.log(user),
+                // console.log(user),
                 <Option key={user.id} value={user.id}>
-                  {user.name} {/* Assuming user has a 'username' field */}
+                  {user.name} " "{user.role} {/* Assuming user has a 'username' field */}
                 </Option>
               ))}
             </Select>

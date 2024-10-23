@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;.kanban-board {
+@tailwind utilities;
+
+.kanban-board {
     display: flex;
     justify-content: space-between;
   }
@@ -11,4 +13,10 @@
     padding: 10px;
     border-radius: 4px;
   }
-  
+ .ant-card-body{
+  padding: 8px !important;
+ }
+ .custom-modal{
+  width: 60% !important;
+ 
+ }
