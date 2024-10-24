@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import dell from "../../image/dell.svg"
 import line from "../../image/line.svg"
+import useProjects from '../customehookapi/useProjects';
+import Singleproject from './Singleproject';
 // Sample initial task data for columns
 const KanbanBoard = ({ selectedProjectId }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -44,7 +46,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
   const { token } = useSelector((state) => state.auth);
   console.log(boardData)
   // Function to show the modal
-
+  
 
   const addSubtask = async (subtask) => {
     const  realTaskId= subtask.id.split('-')[1]; // Extract real task ID
@@ -411,6 +413,8 @@ const KanbanBoard = ({ selectedProjectId }) => {
   return (
     <>
       <h2 align="center">Kanban Board</h2>
+     <Singleproject selectedProjectId={selectedProjectId} />
+
       <Button type="primary" onClick={showModal} style={{ marginBottom: '16px' }}>
         Add Task
       </Button>
