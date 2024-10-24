@@ -164,12 +164,12 @@ function Admindashboard() {
           {
             projects ? <ProjectManagement /> : null
           }
-          <div className='mt-16'>
+          {/* <div className='mt-16'>
             {
               role === "user" && dashbord && <KanbanBoard />  
             }
 
-          </div>
+          </div> */}
 
 
         </div>
