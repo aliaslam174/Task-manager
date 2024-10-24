@@ -35,7 +35,6 @@ const ProjectManagement = () => {
   const { data, error, isLoading, refetch } = useFetchProjectsQuery(currentPage); // Pass pagination parameters
   const { data: usersData } = useFetchUsersQuery(userPage); // Fetch users for the assignment
   const [searchTerm, setSearchTerm] = useState('')
-  
   const projects = data?.data?.data || [];
   const totalProjects = data?.data?.total || 0; // Total number of projects
   const users = usersData?.data?.data || []; // Assuming API returns users arrays
