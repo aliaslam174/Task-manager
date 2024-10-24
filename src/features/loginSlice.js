@@ -39,7 +39,7 @@ const loginSlice = createSlice({
     },
     updateUserState(state, action) {
       console.log("updatestate",action.payload)
-      state.user = action.payload.data;
+      state.user = action.payload;
       // Ensure payload structure is correct
       // if (action.payload?.data) {
       //   state.user = { ...state.user, ...action.payload.data };

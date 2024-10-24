@@ -11,6 +11,9 @@ import Home from './compnent/Home'
 import Userdashboard from './compnent/dashbord/Userdashboard'
 import ProfileManagement from './compnent/dashbord/profile/ProfileManagement'
 import KanbanBoard from './compnent/kanbanboard/KanbanBoard'
+import Maindashcontent from './compnent/dashbord/DashboardHome'
+import UserManagement from './compnent/dashbord/usermanagement/UserManagement'
+import ProjectManagement from './compnent/dashbord/profile/project/ProjectManagement '
 
 
 function App() {
@@ -22,19 +25,24 @@ function App() {
 
 
       <Routes>
-        <Route path='/' element={<Home/>}/>
+      <Route path="/" element={<Home />} />
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<Signup/>}/>
-        {/* <Route path="/dashbord/kanbanbord" element={<KanbanBoard/>}/> */}
-        {/* <Route path='/admin/profile' element={<ProfileManagement/>}/> */}
-        <Route path='/dashbord' element={<AuthGurd> 
-          <Admindashboard/>
-          
-          {/* {role==="admin"?<Admindashboard />:<Userdashboard/>} */}
-          
-          </AuthGurd>
-          }
-        />
+  
+        {/* Dashboard Route */}
+        <Route path="/dashboard" element={<AuthGurd><Admindashboard /></AuthGurd>}>
+        <Route index element={<Maindashcontent />} /> {/* Default content */}
+        <Route path="profile" element={<ProfileManagement />} />
+        <Route path="user-management" element={<UserManagement />} />
+        <Route path="project-management" element={<ProjectManagement/>} /> {/* Example of nested route */}
+      </Route>
+
+        {/* You can define the user dashboard similarly */}
+        <Route path='/userdashboard' element={<Userdashboard />} />
+        
+        {/* Redirect to home if no route matches */}
+        <Route path='*' element={<Navigate to='/' />} />
+  
       </Routes>
     </>
   )

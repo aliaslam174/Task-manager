@@ -26,7 +26,7 @@ function Login() {
         duration: 1,  // Auto-close after 3 seconds
       });
 
-   return <Navigate to='/dashbord' replace />;
+   return <Navigate to='/dashboard' replace />;
  
     
     
