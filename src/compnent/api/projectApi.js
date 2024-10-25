@@ -4,7 +4,7 @@ import { store } from '../../store';
 export const projectApi = createApi({
   reducerPath: 'projectApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://task-manager.codionslab.com/api/v1/admin/', // Start with an empty string
+    baseUrl: '', // Start with an empty string
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token;
       if (token) {
@@ -20,7 +20,7 @@ export const projectApi = createApi({
         const state = store.getState(); // Access the store directly
         const { role } = state?.auth; // Get user info
         console.log(role)
-        // const baseUrl = role === 'admin'? 'https://task-manager.codionslab.com/api/v1/admin/': 'https://task-manager.codionslab.com/api/v1/';
+        const baseUrl = role === 'user'? 'https://task-manager.codionslab.com/api/v1/': 'https://task-manager.codionslab.com/api/v1/';
 
         return `${baseUrl}project?page=${page}`; // Return the full query string
       },
