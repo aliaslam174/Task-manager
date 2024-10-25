@@ -33,11 +33,21 @@ const KanbanBoard = ({ selectedProjectId }) => {
       },
       'column-3': {
         id: 'column-3',
-        title: 'Completed',
-        taskIds: ['task-4'],
+        title: 'testing',
+        taskIds: [],
+      },
+      'column-4': {
+        id: 'column-4',
+        title: 'hold',
+        taskIds: [],
+      },
+      'column-5': {
+        id: 'column-5',
+        title: 'completed',
+        taskIds: [],
       },
     },
-    columnOrder: ['column-1', 'column-2', 'column-3'],
+    columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
   };
 
   const [boardData, setBoardData] = useState(initialData);
@@ -244,41 +254,53 @@ const KanbanBoard = ({ selectedProjectId }) => {
             },
           }
         );
-
-        // Process the response to fit into your board data structure
+  
         const fetchedTasks = response.data.data;
         const newTasks = {};
         const newColumns = {
-          'column-1': { id: 'column-1', title: 'To Do', taskIds: [] },
-          'column-2': { id: 'column-2', title: 'In Progress', taskIds: [] },
-          'column-3': { id: 'column-3', title: 'Completed', taskIds: [] },
+          'column-1': { id: 'column-1', title: 'ToDo', taskIds: [] },
+          'column-2': { id: 'column-2', title: 'InProgress', taskIds: [] },
+          'column-3': { id: 'column-3', title: 'testing', taskIds: [] },
+          'column-4': { id: 'column-4', title: 'hold', taskIds: [] },
+          'column-5': { id: 'column-5', title: 'completed', taskIds: [] },
         };
-
+  
         fetchedTasks.forEach((task) => {
-          const taskId = `task-${task.id}`; // Ensure unique ID format
+          const taskId = `task-${task.id}`;
           newTasks[taskId] = {
             id: taskId,
             content: task.name,
-            des: task.description, // Capture description
-            due_date: task.due_date // Capture due date
+            des: task.description,
+            due_date: task.due_date,
           };
-
-          // Add task to appropriate column based on its status
-          if (task.status === 'todo') {
-            newColumns['column-1'].taskIds.push(taskId);
-          } else if (task.status === 'in-progress') {
-            newColumns['column-2'].taskIds.push(taskId);
-          } else if (task.status === 'completed') {
-            newColumns['column-3'].taskIds.push(taskId);
+  
+          // Assign task to the appropriate column based on its status
+          switch (task.status) {
+            case 'todo':
+              newColumns['column-1'].taskIds.push(taskId);
+              break;
+            case 'in-progress':
+              newColumns['column-2'].taskIds.push(taskId);
+              break;
+            case 'testing':
+              newColumns['column-3'].taskIds.push(taskId);
+              break;
+            case 'hold':
+              newColumns['column-4'].taskIds.push(taskId);
+              break;
+            case 'completed':
+              newColumns['column-5'].taskIds.push(taskId);
+              break;
+            default:
+              break;
           }
         });
-
+  
         setBoardData({
           tasks: newTasks,
           columns: newColumns,
-          columnOrder: ['column-1', 'column-2', 'column-3'],
+          columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
         });
-
       } catch (error) {
         console.error("Error fetching tasks:", error);
         notification.error({ message: 'Failed to fetch tasks!' });
@@ -286,10 +308,9 @@ const KanbanBoard = ({ selectedProjectId }) => {
         setLoading(false);
       }
     };
-
+  
     fetchTasks();
   }, [selectedProjectId, token]);
-
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -311,7 +332,13 @@ const KanbanBoard = ({ selectedProjectId }) => {
       newStatus = 'todo';
     } else if (endColumn.id === 'column-2') {
       newStatus = 'in-progress';
-    } else if (endColumn.id === 'column-3') {
+    }
+    else if (endColumn.id === 'column-3') {
+      newStatus = 'testing';
+    }
+    else if (endColumn.id === 'column-4') {
+      newStatus = 'hold';
+    } else if (endColumn.id === 'column-5') {
       newStatus = 'completed';
     }
     console.log(startColumn)
@@ -391,12 +418,26 @@ const KanbanBoard = ({ selectedProjectId }) => {
             message: 'Task status updated to "In Progress"!',
             duration: 1, // Stays for 3 seconds
           });
-        } else if (statusupdate === 'completed') {
+        }
+        else if (statusupdate === 'hold') {
           notification.success({
-            message: 'Task status updated to "Completed"!',
+            message: 'Task status updated to "In Hold"!',
+            duration: 1, // Stays for 3 seconds
+          });
+        } else if (statusupdate === 'testing') {
+          
+          notification.success({
+            message: 'Task status updated to "Testing"!',
             duration: 1, // Stays for 10 seconds
           });
-        } else {
+        } 
+        else if (statusupdate === 'completed') {
+          
+          notification.success({
+            message: 'Task status updated to "Complete"!',
+            duration: 1, // Stays for 10 seconds
+          });
+        }else {
           notification.warning({
             message: 'Unknown status!',
             duration: 5, // Stays for 7 seconds
