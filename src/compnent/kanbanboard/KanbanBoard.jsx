@@ -5,14 +5,19 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import dell from "../../image/dell.svg"
 import line from "../../image/line.svg"
+import sub from "../../image/sub.svg"
 import useProjects from '../customehookapi/useProjects';
 import Singleproject from './Singleproject';
+import Comments from '../comment/Comments ';
 // Sample initial task data for columns
 const KanbanBoard = ({ selectedProjectId }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [taskModal, setTaskModal] = useState(false);
   const [taskData, setTaskData] = useState("");
-
+  const [isSubtaskModalVisible, setIsSubtaskModalVisible] = useState(false);
+  const [parentTaskId, setParentTaskId] = useState(null);
+  const [subtasks, setSubtasks] = useState([]); // State to hold subtasks
+  const [tasskid,setTaskId]=useState([])
   const initialData = {
     tasks: {
       'task-1': { id: 'task-1', content: 'Set up project' },
@@ -51,73 +56,17 @@ const KanbanBoard = ({ selectedProjectId }) => {
   };
 
   const [boardData, setBoardData] = useState(initialData);
+  const [parentid, setParentId] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const { token } = useSelector((state) => state.auth);
   console.log(boardData)
   // Function to show the modal
-  
 
-  const addSubtask = async (subtask) => {
-    const  realTaskId= subtask.id.split('-')[1]; // Extract real task ID
-    const { content: name, des: description, due_date} = subtask;
-    console.log("sub task",subtask)
-   
-    console.log(realTaskId)
 
-     // Check if the realTaskId is valid
-  if (!realTaskId) {
-    console.error('Error: parent task ID is null or undefined.');
-    notification.error({ message: 'Invalid parent task ID. Unable to add subtask!' });
-    return;
-  }
 
-  const subtaskData = {
-    name ,
-    description,
-    due_date,
-    status:"",// Set default status for subtask
-    parent_id: realTaskId // Ensure parent ID is sent correctly
-  };
- 
-    try {
-      const response = await axios.post(
-        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
-        subtaskData,  // Add subtask data
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      const newSubtask = response.data.data;
-  
-      // Update the board with the new subtask
-      setBoardData((prevData) => {
-        const newSubtaskId = `subtask-${newSubtask.id}`;
-        const updatedTask = {
-          ...prevData.tasks[taskId],
-          subtasks: [...prevData.tasks[taskId].subtasks, { id: newSubtaskId, content: newSubtask.name }],
-        };
-  
-        return {
-          ...prevData,
-          tasks: {
-            ...prevData.tasks,
-            [taskId]: updatedTask,
-          },
-        };
-      });
-  
-      notification.success({ message: 'Subtask added successfully!' });
-    } catch (error) {
-      console.error('Error adding subtask:', error);
-      notification.error({ message: 'Failed to add subtask!' });
-    }
-  };
   const showModal = (subtask) => {
-   
+
     // addSubtask(subtask)
     setIsModalVisible(true);
   };
@@ -126,91 +75,97 @@ const KanbanBoard = ({ selectedProjectId }) => {
   const handleCancel = () => {
     setIsModalVisible(false);
     setTaskModal(false)
+
     form.resetFields(); // Reset form fields when modal is closed
   };
 
   const cancelTaskModal = () => {
-    setTaskModal(false);
+    setIsModalVisible(false);
+    setIsSubtaskModalVisible(false)
+    setTaskModal(false)
+    form.resetFields();
   };
 
   const openTaskModal = (content) => {
     console.log("taskcontent", content)
+    setTaskId(content.id)
     setTaskData(content);
     setTaskModal(true)
     setTaskModal(true);
   };
-// Fetch tasks by project
+  // Fetch tasks by project
 
-const fetchTasks = async () => {
-  setLoading(true);
-  try {
-    const response = await axios.get(
-      `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const fetchedTasks = response.data.data;
-    const newTasks = {};
-    const newColumns = {
-      'column-1': { id: 'column-1', title: 'ToDo', taskIds: [] },
-      'column-2': { id: 'column-2', title: 'InProgress', taskIds: [] },
-      'column-3': { id: 'column-3', title: 'testing', taskIds: [] },
-      'column-4': { id: 'column-4', title: 'hold', taskIds: [] },
-      'column-5': { id: 'column-5', title: 'completed', taskIds: [] },
-    };
-
-    fetchedTasks.forEach((task) => {
-      const taskId = `task-${task.id}`;
-      newTasks[taskId] = {
-        id: taskId,
-        content: task.name,
-        des: task.description,
-        due_date: task.due_date,
+      const fetchedTasks = response.data.data;
+      console.log(fetchedTasks)
+      const newTasks = {};
+      const newColumns = {
+        'column-1': { id: 'column-1', title: 'ToDo', taskIds: [] },
+        'column-2': { id: 'column-2', title: 'InProgress', taskIds: [] },
+        'column-3': { id: 'column-3', title: 'testing', taskIds: [] },
+        'column-4': { id: 'column-4', title: 'hold', taskIds: [] },
+        'column-5': { id: 'column-5', title: 'completed', taskIds: [] },
       };
 
-      // Assign task to the appropriate column based on its status
-      switch (task.status) {
-        case 'todo':
-          newColumns['column-1'].taskIds.push(taskId);
-          break;
-        case 'in-progress':
-          newColumns['column-2'].taskIds.push(taskId);
-          break;
-        case 'testing':
-          newColumns['column-3'].taskIds.push(taskId);
-          break;
-        case 'hold':
-          newColumns['column-4'].taskIds.push(taskId);
-          break;
-        case 'completed':
-          newColumns['column-5'].taskIds.push(taskId);
-          break;
-        default:
-          break;
-      }
-    });
+      fetchedTasks.forEach((task) => {
+        const taskId = `task-${task.id}`;
+        newTasks[taskId] = {
+          id: taskId,
+          content: task.name,
+          des: task.description,
+          due_date: task.due_date,
+        };
 
-    setBoardData({
-      tasks: newTasks,
-      columns: newColumns,
-      columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
-    });
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    notification.error({ message: 'Failed to fetch tasks!' });
-  } finally {
-    setLoading(false);
-  }
-};
-useEffect(() => {
+        // Assign task to the appropriate column based on its status
+        switch (task.status) {
+          case 'todo':
+            newColumns['column-1'].taskIds.push(taskId);
+            break;
+          case 'in-progress':
+            newColumns['column-2'].taskIds.push(taskId);
+            break;
+          case 'testing':
+            newColumns['column-3'].taskIds.push(taskId);
+            break;
+          case 'hold':
+            newColumns['column-4'].taskIds.push(taskId);
+            break;
+          case 'completed':
+            newColumns['column-5'].taskIds.push(taskId);
+            break;
+          default:
+            break;
+        }
+      });
+
+      setBoardData({
+        tasks: newTasks,
+        columns: newColumns,
+        columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
+      });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      notification.error({ message: 'Failed to fetch tasks!' });
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
 
 
-  fetchTasks();
-}, [selectedProjectId, token]);
+    fetchTasks();
+  }, [selectedProjectId, token]);
   // Function to handle task addition
   const addTask = async (values) => {
     console.log(values)
@@ -261,7 +216,7 @@ useEffect(() => {
       });
 
 
-      
+
       notification.success({ message: 'Task added successfully!' });
       handleCancel(); // Close the modal after successful submission
     } catch (error) {
@@ -272,7 +227,7 @@ useEffect(() => {
   };
   const deleteTask = async (taskId) => {
 
-
+console.log(taskId)
     const taskRealId = taskId.split('-')[1]; // Extract the real task ID if needed
     console.log(taskRealId)
 
@@ -309,10 +264,83 @@ useEffect(() => {
       notification.error({ message: 'Failed to delete task!' });
     }
   };
- 
-  
-  
-  
+
+
+  const addSubtask = async (values) => {
+    if (!parentTaskId) {
+      notification.error({ message: 'Parent task ID is not set!' });
+      return;
+    }
+    console.log(parentTaskId)
+    const realTaskId = parentTaskId.id.split('-')[1]; // Extract real task ID
+    const { name, description, due_date } = values;
+
+
+    const subtaskData = {
+      name,
+      description,
+      due_date,
+      status: "todo", // Default status for subtask
+      parent_id: realTaskId,
+    };
+
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+        subtaskData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const newSubtask = response.data.data;
+      console.log(newSubtask)
+
+      fetchTasks(newSubtask);
+      const newSubtaskId = `subtask-${newSubtask.id}`;
+
+      setBoardData((prevData) => {
+        const updatedTask = {
+          ...prevData.tasks[parentTaskId],
+          subtasks: [...(prevData.tasks[parentTaskId].newSubtask || []), { id: newSubtaskId, content: newSubtask.name }],
+        };
+
+        return {
+          ...prevData,
+          tasks: {
+            ...prevData.tasks,
+            [parentTaskId]: updatedTask,
+          },
+        };
+      });
+
+      notification.success({ message: 'Subtask added successfully!' });
+      handleCancel(); // Close the modal after successful submission
+    } catch (error) {
+      console.error('Error adding subtask:', error);
+      notification.error({ message: 'Failed to add subtask!' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to show the subtask modal and set the parent task ID
+  // Show subtask modal
+  const showSubtaskModal = (task) => {
+    console.log(task)
+    if (task) {
+      setParentTaskId(task);
+      setSubtasks(task?.subtasks || []); // Set existing subtasks for the task
+      setIsSubtaskModalVisible(true);
+    } else {
+      console.error('Task is undefined or does not have an ID');
+    }
+  };
+
+
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -400,7 +428,7 @@ useEffect(() => {
           due_date: movedTask.due_date, // Set the due date if applicable, otherwise send null
           status: newStatus
         };
-     const update=   await axios.put(
+        const update = await axios.put(
           `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task/${taskId}`,
           updatedTaskData,
           {
@@ -427,25 +455,25 @@ useEffect(() => {
             duration: 1, // Stays for 3 seconds
           });
         } else if (statusupdate === 'testing') {
-          
+
           notification.success({
             message: 'Task status updated to "Testing"!',
             duration: 1, // Stays for 10 seconds
           });
-        } 
+        }
         else if (statusupdate === 'completed') {
-          
+
           notification.success({
             message: 'Task status updated to "Complete"!',
             duration: 1, // Stays for 10 seconds
           });
-        }else {
+        } else {
           notification.warning({
             message: 'Unknown status!',
             duration: 5, // Stays for 7 seconds
           });
         }
-        
+
       } catch (error) {
         console.error("Error updating task status:", error);
         notification.error({ message: 'Failed to update task status!' });
@@ -456,7 +484,7 @@ useEffect(() => {
   return (
     <>
       <h2 align="center">Kanban Board</h2>
-     <Singleproject selectedProjectId={selectedProjectId} />
+      <Singleproject selectedProjectId={selectedProjectId} />
 
       <Button type="primary" onClick={showModal} style={{ marginBottom: '16px' }}>
         Add Task
@@ -492,6 +520,35 @@ useEffect(() => {
       </Modal>
 
 
+      {/* New sub Task Modal */}
+      {/* Subtask Modal */}
+      <Modal title="Subtasks" visible={isSubtaskModalVisible} onCancel={cancelTaskModal} footer={null}>
+        <h3>Existing Subtasks:</h3>
+        <ul>
+          {subtasks.map(subtask => (
+            <li key={subtask.id}>{subtask.content}</li> // Assuming subtask has content field
+          ))}
+        </ul>
+        <Form form={form} onFinish={addSubtask}>
+          <Form.Item name="name" label="Subtask Name" rules={[{ required: true, message: 'Please input the subtask name!' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item name="due_date" label="Due Date">
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Add Subtask
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+
+
       {/* taskdetail modal */}
       <div className='bg-gray-400'>
         <Modal className="custom-modal" open={taskModal} onCancel={handleCancel} footer={null}>
@@ -501,17 +558,22 @@ useEffect(() => {
               <p>{taskData.des}</p>
               <div className='subtask'>
                 <h2 className='font-bold '>SubTask</h2>
-                <Button className='my-5' onClick={()=>{showModal(taskData)}}>Add</Button>
+                <Button className='my-5' onClick={() => { showModal(taskData) }}>Add</Button>
               </div>
             </div>
 
 
-            <div className=''> <h1 className='text-xl font-bold'>Comment</h1></div>
+            <div className=''>
+              <h1 className='text-xl font-bold'>Comment</h1>
+
+              <Comments taskData={taskData} tasskid={tasskid}  selectedProjectId={selectedProjectId} />
+            </div>
 
           </div>
 
         </Modal>
       </div>
+
 
       {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -560,8 +622,13 @@ useEffect(() => {
 
                             {task.content}
 
-                            <div className='flex justify-between'> <div><img width="15px" onClick={() => openTaskModal(task)} src={line} alt="" /></div>
-                              <div className='test-end'><img width="15px" onClick={() => { deleteTask(task.id) }} src={dell} alt="" /></div></div>
+                            <div className='flex justify-around mt-10'>
+                              <div><img width="15px" onClick={() => openTaskModal(task)} src={line} alt="" /></div>
+                              <div className='test-end'><img width="15px" onClick={() => { deleteTask(task.id) }} src={dell} alt="" /></div>
+                              <div className='test-end'><img width="15px" onClick={() => { showSubtaskModal(task) }} src={sub} alt="" /></div>
+
+                            </div>
+
                           </div>
                         )}
                       </Draggable>
