@@ -139,12 +139,83 @@ const KanbanBoard = ({ selectedProjectId }) => {
     setTaskModal(true)
     setTaskModal(true);
   };
+// Fetch tasks by project
 
+const fetchTasks = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(
+      `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const fetchedTasks = response.data.data;
+    const newTasks = {};
+    const newColumns = {
+      'column-1': { id: 'column-1', title: 'ToDo', taskIds: [] },
+      'column-2': { id: 'column-2', title: 'InProgress', taskIds: [] },
+      'column-3': { id: 'column-3', title: 'testing', taskIds: [] },
+      'column-4': { id: 'column-4', title: 'hold', taskIds: [] },
+      'column-5': { id: 'column-5', title: 'completed', taskIds: [] },
+    };
+
+    fetchedTasks.forEach((task) => {
+      const taskId = `task-${task.id}`;
+      newTasks[taskId] = {
+        id: taskId,
+        content: task.name,
+        des: task.description,
+        due_date: task.due_date,
+      };
+
+      // Assign task to the appropriate column based on its status
+      switch (task.status) {
+        case 'todo':
+          newColumns['column-1'].taskIds.push(taskId);
+          break;
+        case 'in-progress':
+          newColumns['column-2'].taskIds.push(taskId);
+          break;
+        case 'testing':
+          newColumns['column-3'].taskIds.push(taskId);
+          break;
+        case 'hold':
+          newColumns['column-4'].taskIds.push(taskId);
+          break;
+        case 'completed':
+          newColumns['column-5'].taskIds.push(taskId);
+          break;
+        default:
+          break;
+      }
+    });
+
+    setBoardData({
+      tasks: newTasks,
+      columns: newColumns,
+      columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
+    });
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    notification.error({ message: 'Failed to fetch tasks!' });
+  } finally {
+    setLoading(false);
+  }
+};
+useEffect(() => {
+
+
+  fetchTasks();
+}, [selectedProjectId, token]);
   // Function to handle task addition
   const addTask = async (values) => {
     console.log(values)
-    const { name, description, due_date } = values; // Assume parent_id comes from the form
-    const status = 'todo'; // Default status
+    const { name, description, due_date, status } = values; // Assume parent_id comes from the form
+    // const status = 'todo'; // Default status
 
     setLoading(true);
 
@@ -154,7 +225,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
         name,
         description,
         due_date,
-        status,
+        status
       };
 
       // Make a POST request to add a new task
@@ -169,7 +240,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
       );
 
       const newTask = response.data.data; // Assuming the new task details are in the response
-
+      fetchTasks();
       // Add new task to the board data
       setBoardData((prevData) => {
         const newTaskId = `task-${newTask.id}`;
@@ -241,76 +312,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
  
   
   
-  // Fetch tasks by project
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `https://task-manager.codionslab.com/api/v1/project/${selectedProjectId.id}/task`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
   
-        const fetchedTasks = response.data.data;
-        const newTasks = {};
-        const newColumns = {
-          'column-1': { id: 'column-1', title: 'ToDo', taskIds: [] },
-          'column-2': { id: 'column-2', title: 'InProgress', taskIds: [] },
-          'column-3': { id: 'column-3', title: 'testing', taskIds: [] },
-          'column-4': { id: 'column-4', title: 'hold', taskIds: [] },
-          'column-5': { id: 'column-5', title: 'completed', taskIds: [] },
-        };
-  
-        fetchedTasks.forEach((task) => {
-          const taskId = `task-${task.id}`;
-          newTasks[taskId] = {
-            id: taskId,
-            content: task.name,
-            des: task.description,
-            due_date: task.due_date,
-          };
-  
-          // Assign task to the appropriate column based on its status
-          switch (task.status) {
-            case 'todo':
-              newColumns['column-1'].taskIds.push(taskId);
-              break;
-            case 'in-progress':
-              newColumns['column-2'].taskIds.push(taskId);
-              break;
-            case 'testing':
-              newColumns['column-3'].taskIds.push(taskId);
-              break;
-            case 'hold':
-              newColumns['column-4'].taskIds.push(taskId);
-              break;
-            case 'completed':
-              newColumns['column-5'].taskIds.push(taskId);
-              break;
-            default:
-              break;
-          }
-        });
-  
-        setBoardData({
-          tasks: newTasks,
-          columns: newColumns,
-          columnOrder: ['column-1', 'column-2', 'column-3', 'column-4', 'column-5'],
-        });
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-        notification.error({ message: 'Failed to fetch tasks!' });
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchTasks();
-  }, [selectedProjectId, token]);
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -474,7 +476,9 @@ const KanbanBoard = ({ selectedProjectId }) => {
           <Form.Item name="status" label="Status" initialValue="todo">
             <Select>
               <Select.Option value="todo">To Do</Select.Option>
-              <Select.Option value="in_progress">In Progress</Select.Option>
+              <Select.Option value="in-progress">In Progress</Select.Option>
+              <Select.Option value="testing">testing</Select.Option>
+              <Select.Option value="hold">hold</Select.Option>
               <Select.Option value="completed">Completed</Select.Option>
             </Select>
           </Form.Item>

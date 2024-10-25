@@ -1,10 +1,10 @@
+
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { store } from '../../store';
 
 export const projectApi = createApi({
   reducerPath: 'projectApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '', // Start with an empty string
+    baseUrl: 'https://task-manager.codionslab.com/api/v1/admin',
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token;
       if (token) {
@@ -16,19 +16,12 @@ export const projectApi = createApi({
   tagTypes: ['Project'],
   endpoints: (builder) => ({
     fetchProjects: builder.query({
-      query: (page = 1) => {
-        const state = store.getState(); // Access the store directly
-        const { role } = state?.auth; // Get user info
-        console.log(role)
-        const baseUrl = role === 'user'? 'https://task-manager.codionslab.com/api/v1/': 'https://task-manager.codionslab.com/api/v1/';
-
-        return `${baseUrl}project?page=${page}`; // Return the full query string
-      },
+      query: (page=1) => `project?page=${page}`,
       providesTags: ['Project'],
     }),
     createProject: builder.mutation({
       query: (newProject) => ({
-        url: `${baseUrl}project`, // Use baseUrl variable here
+        url: 'project',
         method: 'POST',
         body: newProject,
       }),
@@ -36,7 +29,7 @@ export const projectApi = createApi({
     }),
     updateProject: builder.mutation({
       query: ({ id, data }) => ({
-        url: `${baseUrl}project/${id}`, // Use baseUrl variable here
+        url: `project/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -44,23 +37,22 @@ export const projectApi = createApi({
     }),
     deleteProject: builder.mutation({
       query: (id) => ({
-        url: `${baseUrl}project/${id}`, // Use baseUrl variable here
+        url: `project/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Project'],
     }),
     assignProject: builder.mutation({
       query: ({ projectId, userId }) => ({
-        url: `${baseUrl}project/${projectId}/assign`, // Use baseUrl variable here
+        url: `project/${projectId}/assign`,
         method: 'POST',
-        body: { user_ids: [userId] },
+        body: { user_id: userId },
       }),
       invalidatesTags: ['Project'],
     }),
   }),
 });
 
-// Export hooks for usage in functional components
 export const {
   useFetchProjectsQuery,
   useCreateProjectMutation,

@@ -29,11 +29,18 @@ const ProjectManagement = () => {
   const [board, setBoard] = useState(false)
   const [project, setProject] = useState(true)
 
-
+  // / State for pagination and search
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  
   const { data, error, isLoading, refetch } = useFetchProjectsQuery(currentPage); // Pass pagination parameters
+ 
+//  const {data,error,isLoading,refetch}=useFetchProjectsQuery(currentPage)
+ 
+ console.log(data)
   const { data: usersData } = useFetchUsersQuery(userPage); // Fetch users for the assignment
+  
   const [searchTerm, setSearchTerm] = useState('')
   const projects = data?.data?.data || [];
   const totalProjects = data?.data?.total || 0; // Total number of projects
@@ -42,6 +49,7 @@ const ProjectManagement = () => {
  
   const { user, token } = useSelector((state) => state.auth);
   // Open modal for creating or updating project
+
   const openModal = (project = null) => {
     setEditingProject(project);
     setIsModalVisible(true);
@@ -155,8 +163,11 @@ const ProjectManagement = () => {
 
   // Handle table pagination
   const handleTableChange = (pagination) => {
+
+    console.log(pagination)
     setCurrentPage(pagination); // Update current page
-    setPageSize(pagination.pageSize); // Update page size
+    console.log(pageSize)
+    setPageSize(pageSize.pagination); // Update page size
   };
 
   if (isLoading) return <Spin size="large" />;
@@ -213,6 +224,7 @@ const ProjectManagement = () => {
             rowKey={(record) => record.id}
             
             pagination={{
+            
               current: currentPage,
               pageSize: pageSize,
               total: totalProjects,
