@@ -63,8 +63,17 @@ function Admindashboard() {
                     Project Management
                   </Link>
                 </li>
+                
               </>
             )}
+            <li className='px-4'>
+            <div className="flex items-center space-x-4">
+      <button onClick={handleLogout} className="bg-red-600 lg:hidden flex text-white px-4 py-2 rounded">
+        Logout
+      </button>
+    </div>
+            </li>
+            
           </ul>
         </nav>
       </aside>
@@ -77,7 +86,7 @@ function Admindashboard() {
    </Link>
    
     <div className="flex items-center space-x-4">
-      <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded">
+      <button onClick={handleLogout} className="bg-red-600 lg:flex hidden text-white px-4 py-2 rounded">
         Logout
       </button>
     </div>
