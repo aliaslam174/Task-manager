@@ -191,30 +191,63 @@ const UserManagement = () => {
       </Modal>
 
       {/* Add User Modal */}
-      <Modal title="Add User" visible={isModalVisible} onCancel={() => setIsModalVisible(false)} footer={null}>
-        <Form form={form} onFinish={handleAddUser}>
-          <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please input name!' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Please input email!' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Role" name="role" rules={[{ required: true, message: 'Please input role!' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Please input password!' }]}>
-            <Input.Password />
-          </Form.Item>
-          <Form.Item label="Is Active" name="is_active" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Add
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+      <Modal
+      title="Add User"
+      visible={isModalVisible}
+      onCancel={() => setIsModalVisible(false)}
+      footer={null}
+      width={320} // Set a default width for mobile devices
+      bodyStyle={{ padding: '20px' }} // Add padding for better spacing
+      centered // Center the modal
+    >
+      <Form form={form} onFinish={handleAddUser} layout="vertical">
+        <Form.Item
+          label="Name"
+          name="name"
+          rules={[{ required: true, message: 'Please input name!' }]}
+        >
+          <Input />
+        </Form.Item>
+        
+        <Form.Item
+          label="Email"
+          name="email"
+          rules={[{ required: true, message: 'Please input email!' }]}
+        >
+          <Input />
+        </Form.Item>
+        
+        <Form.Item
+          label="Role"
+          name="role"
+          rules={[{ required: true, message: 'Please input role!' }]}
+        >
+          <Input />
+        </Form.Item>
+        
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: 'Please input password!' }]}
+        >
+          <Input.Password />
+        </Form.Item>
+        
+        <Form.Item
+          label="Is Active"
+          name="is_active"
+          valuePropName="checked"
+        >
+          <Switch />
+        </Form.Item>
+        
+        <Form.Item>
+          <Button type="primary" htmlType="submit" block>
+            Add
+          </Button>
+        </Form.Item>
+      </Form>
+    </Modal>
     </div>
   );
 };

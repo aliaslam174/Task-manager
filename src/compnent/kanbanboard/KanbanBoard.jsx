@@ -594,7 +594,7 @@ console.log(taskId)
         <Spin size='large' />
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div style={{ display: 'flex' }}>
+          <div className='lg:flex'>
             {boardData.columnOrder.map((columnId) => {
               const column = boardData.columns[columnId];
               const tasks = column.taskIds.map((taskId) => boardData.tasks[taskId]);
@@ -602,16 +602,16 @@ console.log(taskId)
               return (
                 <Droppable key={column.id} droppableId={column.id}>
                   {(provided) => (
-                    <div
+                    <div className='w-full '
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       style={{
                         border: '1px solid lightgrey',
                         borderRadius: '10px',
-                        width: '300px',
+                       
                         margin: '8px',
                         padding: '16px',
-                        background: 'transparent',
+                        background: '#F1F2F4',
                         overflowY: 'auto', // Enable vertical scrolling
                         maxHeight: '400px', // Set a max height to enable scrolling
                       }}
