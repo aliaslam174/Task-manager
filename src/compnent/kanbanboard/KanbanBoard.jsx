@@ -277,11 +277,12 @@ console.log(taskId)
     const { name, description, due_date } = values;
 
 
+
     const subtaskData = {
       name,
       description,
       due_date,
-      status: "todo", // Default status for subtask
+      status:"todo", // Default status for subtask
       parent_id: realTaskId,
     };
 
@@ -298,7 +299,7 @@ console.log(taskId)
       );
 
       const newSubtask = response.data.data;
-      console.log(newSubtask)
+      console.log("subtask",newSubtask)
 
       fetchTasks(newSubtask);
       const newSubtaskId = `subtask-${newSubtask.id}`;

@@ -13,7 +13,7 @@ const Profile = ({ setProfile }) => {
 
   const navigate = useNavigate(); // Use navigate for redirection
   const { user, token } = useSelector((state) => state.auth); // Get user data from Redux
- 
+
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   // Local state for form fields
@@ -27,23 +27,24 @@ const Profile = ({ setProfile }) => {
     if (user) {
       setName(user.name);
       setEmail(user.email);
+
     }
   }, [user]);
   const fetchUsers = async () => {
-  
+
     setLoading(true); // Start loading state
-  
+
     try {
       const response = await axios.get('https://task-manager.codionslab.com/api/v1/profile', {
         headers: {
           Authorization: `Bearer ${token}`, // Add token to Authorization header
         },
       });
-  console.log(response.data.data)
+      console.log(response.data.data)
       // Dispatch fetched user data to Redux
-  
+
       dispatch(updateUserState(response?.data?.data)); // Assuming response.data contains user info
-  navigate("/dashboard")
+      navigate("/dashboard")
       // Optionally, you could set the fetched data to local state if needed
       // setUsers(response.data); // If you want to keep a local copy of users
     } catch (error) {
@@ -58,9 +59,9 @@ const Profile = ({ setProfile }) => {
       setLoading(false); // Stop loading state
     }
   };
-  
+
   // Set form fields with user data
- 
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,10 +69,10 @@ const Profile = ({ setProfile }) => {
     try {
       // Make the API request
       const updatedUser = await updateUser({ name, email, password }).unwrap();
-      console.log( "update",updatedUser);
+      console.log("update", updatedUser);
       fetchUsers()
       // Dispatch updated user data to Redux
-    //  dispatch(updateUserState(userData.data));
+      //  dispatch(updateUserState(userData.data));
 
       notification.success({
         message: 'Profile Updated',
@@ -79,13 +80,13 @@ const Profile = ({ setProfile }) => {
         placement: 'topRight',
         duration: 1,  // Auto-close after 1 second
       });
-     
+
       // Clear password field after submission
       setPassword('');
 
       // Redirect to dashboard after update
-      
-      
+
+
     } catch (error) {
       console.error('Failed to update profile:', error);
       notification.error({
@@ -103,7 +104,7 @@ const Profile = ({ setProfile }) => {
   return (
     <div className="w-[90%] mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Profile Management</h2>
-      
+
       {/* Display User Role */}
       <div className="flex items-center justify-center mb-4">
         <span className="capitalize text-lg font-semibold">{user?.role}</span>

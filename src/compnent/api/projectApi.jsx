@@ -16,7 +16,7 @@ export const projectApi = createApi({
   tagTypes: ['Project'],
   endpoints: (builder) => ({
     fetchProjects: builder.query({
-      query: (page=1) => `project?page=${page}`,
+      query: (page) => `project?page=${page}`,
       providesTags: ['Project'],
     }),
     createProject: builder.mutation({
