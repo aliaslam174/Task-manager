@@ -24,7 +24,8 @@ const loginSlice = createSlice({
     loading: false,
     error: null,
     role:null,
-    totaluser:null
+    totaluser:null,
+    totalprojects:null
   },
   reducers: {
     logout: (state) => {
@@ -36,6 +37,10 @@ const loginSlice = createSlice({
     totaluser: (state,action) => {
       console.log(action.payload)
       state.totaluser = action.payload;
+    },
+    totalproject: (state,action) => {
+      console.log(action.payload)
+      state.totalprojects = action.payload;
     },
     updateUserState(state, action) {
       console.log("updatestate",action.payload)
@@ -75,5 +80,5 @@ const loginSlice = createSlice({
   }
 });
 
-export const { logout,updateUserState ,totaluser} = loginSlice.actions;
+export const { logout,updateUserState ,totaluser,totalproject} = loginSlice.actions;
 export default loginSlice.reducer;

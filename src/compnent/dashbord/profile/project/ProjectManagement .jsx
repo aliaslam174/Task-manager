@@ -33,17 +33,18 @@ const ProjectManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  
-  const { data, error, isLoading, refetch } = useFetchProjectsQuery(); // Pass pagination parameters
+  const { data: usersData } = useFetchUsersQuery(userPage); // Fetch users for the assignment
+
  
-//  const {data,error,isLoading,refetch}=useFetchProjectsQuery(currentPage)
+ const {data,error,isLoading,refetch}=useFetchProjectsQuery(currentPage)
  
  console.log("projects", data);
 
-  const { data: usersData } = useFetchUsersQuery(userPage); // Fetch users for the assignment
+
   
   const [searchTerm, setSearchTerm] = useState('')
   const projects = data?.data?.data || [];
+  
   const totalProjects = data?.data?.total || 0; // Total number of projects
   const users = usersData?.data?.data || []; // Assuming API returns users arrays
   const [selectedProject, setSelectedProject] = useState(null);
