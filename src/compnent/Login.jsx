@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom';
-import { login } from '../features/Loginslice';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { notification } from 'antd';
+import { login } from '../features/loginSlice';
 function Login() {
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
