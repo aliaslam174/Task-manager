@@ -67,9 +67,9 @@ if(response.data.status === 200){
   return (
     <>
 
-      <div className='mt-8 content-center w-full mb-10'>
+      <div className='mt-20 content-center w-full mb-10'>
         <div className='w-[80vw] md:w-[40vw]  flex flex-col content-center m-auto'>
-          <h2 className='font-semibold text-4xl text-center mb-4'>Create new account</h2>
+          <h2 className='font-semibold lg:text-4xl  text-xl text-center mb-4'>Create new account</h2>
           <p className='text-[#64748B] text-center'>
             Already have an account?{' '}
             <Link to='/login' className='underline'>
