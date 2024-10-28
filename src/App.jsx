@@ -40,7 +40,7 @@ function App() {
       )}
     
       {/* Redirect to home if no route matches */}
-      <Route path='*' element={<Navigate to='/' />} />
+      <Route path='*' element={<Navigate to='/dashboard' />} />
     </Route>
 
       </Routes>

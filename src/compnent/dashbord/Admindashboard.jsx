@@ -72,8 +72,10 @@ function Admindashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
   <header className="flex justify-between items-center p-6 bg-white shadow-md">
+   <Link to="/dashboard">
+   <div className="text-lg font-semibold" onClick={closeDrawer}>Task Management Application</div>
+   </Link>
    
-    <div className="text-lg font-semibold">Task Management Application</div>
     <div className="flex items-center space-x-4">
       <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded">
         Logout
