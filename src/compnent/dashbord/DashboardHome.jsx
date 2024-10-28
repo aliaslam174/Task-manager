@@ -21,10 +21,7 @@ function DashboardHome() {
           <h3 className="text-lg font-semibold">Active Projects</h3>
           <p className="mt-2 text-gray-600">8</p>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-semibold">Pending Tasks</h3>
-          <p className="mt-2 text-gray-600">45</p>
-        </div>
+       
       </div>
     </main>):<AssignedProjects/>
   }
