@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'; // Assuming you're using
 import { notification, Spin } from 'antd'; // For notifications
 import { useUpdateUserMutation, useGetUserQuery } from '../../api/Profileupdateapi';
 import { Navigate, useNavigate } from 'react-router-dom'; // For navigation after update
-import { updateUserState } from '../../../features/Loginslice';
+import { updateUserState } from '../../../features/loginSlice';
 import axios from 'axios';
 
 const Profile = ({ setProfile }) => {
