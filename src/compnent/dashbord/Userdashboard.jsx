@@ -1,6 +1,6 @@
 import React from 'react'
 import { persistor } from '../../store';
-import { logout } from '../../features/Loginslice';
+import { logout } from '../../features/loginSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { notification } from 'antd';
