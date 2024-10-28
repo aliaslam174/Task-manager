@@ -144,14 +144,14 @@ const UserManagement = () => {
       <h2 className="text-2xl font-bold text-center mb-6">User List</h2>
 
       {/* Search by ID input */}
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <Input
           placeholder="Search by ID"
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
           style={{ width: '300px', marginBottom: '20px' }}
         />
-      </div>
+      </div> */}
 
       <Button type="primary" onClick={() => setIsModalVisible(true)} style={{ marginBottom: '20px' }}>
         Add User

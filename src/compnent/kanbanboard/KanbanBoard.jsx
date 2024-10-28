@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Card, Button, Input, Form, DatePicker, notification, Select, Modal } from 'antd';
+import { Card, Button, Input, Form, DatePicker, notification, Select, Modal, Spin } from 'antd';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import dell from "../../image/dell.svg"
@@ -18,6 +18,7 @@ const KanbanBoard = ({ selectedProjectId }) => {
   const [parentTaskId, setParentTaskId] = useState(null);
   const [subtasks, setSubtasks] = useState([]); // State to hold subtasks
   const [tasskid,setTaskId]=useState([])
+  const { user, role } = useSelector((state) => state.auth);
   const initialData = {
     tasks: {
       'task-1': { id: 'task-1', content: 'Set up project' },
@@ -483,12 +484,23 @@ console.log(taskId)
 
   return (
     <>
-      <h2 align="center">Kanban Board</h2>
-      <Singleproject selectedProjectId={selectedProjectId} />
+  
 
-      <Button type="primary" onClick={showModal} style={{ marginBottom: '16px' }}>
+      {
+        role === 'admin' && (
+          <>
+           <Singleproject selectedProjectId={selectedProjectId} />
+           <Button type="primary" onClick={showModal} style={{ marginBottom: '16px' }}>
         Add Task
       </Button>
+          </>
+         
+          
+        )
+      }
+     
+
+     
       {/* New Task Modal */}
       <Modal title="Add a new task" visible={isModalVisible} onCancel={handleCancel} footer={null}>
         <Form form={form} onFinish={addTask}>
@@ -563,84 +575,97 @@ console.log(taskId)
             </div>
 
 
-            <div className=''>
+           
+
+          </div>
+          <div className=''>
               <h1 className='text-xl font-bold'>Comment</h1>
 
               <Comments taskData={taskData} tasskid={tasskid}  selectedProjectId={selectedProjectId} />
             </div>
-
-          </div>
-
         </Modal>
       </div>
 
 
       {/* Kanban Board */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ display: 'flex' }}>
-          {boardData.columnOrder.map((columnId) => {
-            const column = boardData.columns[columnId];
-            const tasks = column.taskIds.map((taskId) => boardData.tasks[taskId]);
 
-            return (
-              <Droppable key={column.id} droppableId={column.id}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    style={{
-                      border: '1px solid lightgrey',
-                      borderRadius: '10px',
-                      width: '300px',
-                      margin: '8px',
-                      padding: '16px',
-                      background: 'transparent',
-                    }}
-                  >
-                    <h3>{column.title}</h3>
-                    {tasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              userSelect: 'none',
-                              padding: '6px',
-                              margin: '0 0 8px 0',
-                              minHeight: '50px',
-                              background: 'white',
-                              border: '1px solid lightgrey',
-                              borderRadius: '10px',
-                              color: 'black',
-                              cursor: "pointer",
-                              ...provided.draggableProps.style,
-                            }}
-                          // Handle task click to open modal
-                          >
-
-                            {task.content}
-
-                            <div className='flex justify-around mt-10'>
-                              <div><img width="15px" onClick={() => openTaskModal(task)} src={line} alt="" /></div>
-                              <div className='test-end'><img width="15px" onClick={() => { deleteTask(task.id) }} src={dell} alt="" /></div>
-                              <div className='test-end'><img width="15px" onClick={() => { showSubtaskModal(task) }} src={sub} alt="" /></div>
-
-                            </div>
-
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            );
-          })}
-        </div>
-      </DragDropContext>
+      {
+      loading ? (
+        <Spin size='large' />
+      ) : (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div style={{ display: 'flex' }}>
+            {boardData.columnOrder.map((columnId) => {
+              const column = boardData.columns[columnId];
+              const tasks = column.taskIds.map((taskId) => boardData.tasks[taskId]);
+      
+              return (
+                <Droppable key={column.id} droppableId={column.id}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      style={{
+                        border: '1px solid lightgrey',
+                        borderRadius: '10px',
+                        width: '300px',
+                        margin: '8px',
+                        padding: '16px',
+                        background: 'transparent',
+                        overflowY: 'auto', // Enable vertical scrolling
+                        maxHeight: '400px', // Set a max height to enable scrolling
+                      }}
+                    >
+                      <h3>{column.title}</h3>
+                      <div > {/* Inner div for scrolling */}
+                        {tasks.map((task, index) => (
+                          <Draggable key={task.id} draggableId={task.id} index={index}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                style={{
+                                  userSelect: 'none',
+                                  padding: '6px',
+                                  margin: '0 0 8px 0',
+                                  minHeight: '50px',
+                                  background: 'white',
+                                  border: '1px solid lightgrey',
+                                  borderRadius: '10px',
+                                  color: 'black',
+                                  cursor: "pointer",
+                                  ...provided.draggableProps.style,
+                                }}
+                              >
+                                {task.content}
+                                <div className='flex justify-around mt-10'>
+                                  {role === "admin" ? (
+                                    <>
+                                      <div className='test-end'><img width="15px" onClick={() => { deleteTask(task.id) }} src={dell} alt="" /></div>
+                                      <div className='test-end'><img width="15px" onClick={() => { showSubtaskModal(task) }} src={sub} alt="" /></div>
+                                    </>
+                                  ) : null}
+      
+                                  <div><img width="15px" onClick={() => openTaskModal(task)} src={line} alt="" /></div>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    </div>
+                  )}
+                </Droppable>
+              );
+            })}
+          </div>
+        </DragDropContext>
+      )
+      
+      }
+      
     </>
   );
 };

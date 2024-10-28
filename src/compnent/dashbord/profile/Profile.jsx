@@ -1,7 +1,7 @@
 // src/components/ProfileManagement.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux'; // Assuming you're using Redux
-import { notification } from 'antd'; // For notifications
+import { notification, Spin } from 'antd'; // For notifications
 import { useUpdateUserMutation, useGetUserQuery } from '../../api/Profileupdateapi';
 import { Navigate, useNavigate } from 'react-router-dom'; // For navigation after update
 import { updateUserState } from '../../../features/Loginslice';
@@ -97,7 +97,7 @@ const Profile = ({ setProfile }) => {
     }
   };
 
-  if (isFetching) return <div>Loading user data...</div>; // Handle loading state
+  if (isFetching) return <Spin size="large" />; // Handle loading state
   if (fetchError) return <div>Error fetching user data: {fetchError.message}</div>; // Handle fetch error
 
   return (

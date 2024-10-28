@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Input, notification, Spin, Select } from 'antd';
 import { useFetchUsersQuery } from '../../../api/Getalluserapi';
-import { useFetchProjectsQuery, useCreateProjectMutation, useUpdateProjectMutation, useDeleteProjectMutation, useAssignProjectMutation } from '../../../api/projectApi';
+import { useFetchProjectsQuery,  useUpdateProjectMutation, useDeleteProjectMutation, useAssignProjectMutation } from '../../../api/projectApi';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
@@ -21,7 +21,7 @@ const ProjectManagement = () => {
   const [allUsers, setAllUsers] = useState([])
   // RTK Query hooks
 
-  const [createProject] = useCreateProjectMutation();
+ 
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject] = useDeleteProjectMutation();
   
@@ -34,11 +34,12 @@ const ProjectManagement = () => {
   const [pageSize, setPageSize] = useState(10);
 
   
-  const { data, error, isLoading, refetch } = useFetchProjectsQuery(currentPage); // Pass pagination parameters
+  const { data, error, isLoading, refetch } = useFetchProjectsQuery(); // Pass pagination parameters
  
 //  const {data,error,isLoading,refetch}=useFetchProjectsQuery(currentPage)
  
- console.log(data)
+ console.log("projects", data);
+
   const { data: usersData } = useFetchUsersQuery(userPage); // Fetch users for the assignment
   
   const [searchTerm, setSearchTerm] = useState('')

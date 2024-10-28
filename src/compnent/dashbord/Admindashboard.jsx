@@ -93,11 +93,7 @@ function Admindashboard() {
                 
               </>
             )}
-              <li>
-                  <Link to="/dashboard/project-management" className="block py-2 px-4 hover:bg-gray-700">
-                    Project Management
-                  </Link>
-                </li>
+             
           </ul>
         </nav>
       </aside>

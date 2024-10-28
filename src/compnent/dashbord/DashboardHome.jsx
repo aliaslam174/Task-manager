@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
+import AssignedProjects from './user/AssignedProjects ';
 
 
 function DashboardHome() {
@@ -25,7 +26,7 @@ function DashboardHome() {
           <p className="mt-2 text-gray-600">45</p>
         </div>
       </div>
-    </main>):null
+    </main>):<AssignedProjects/>
   }
   
   

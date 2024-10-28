@@ -13,10 +13,11 @@ import ProfileManagement from './compnent/dashbord/profile/ProfileManagement'
 import Maindashcontent from './compnent/dashbord/DashboardHome'
 import UserManagement from './compnent/dashbord/usermanagement/UserManagement'
 import ProjectManagement from './compnent/dashbord/profile/project/ProjectManagement '
+import AssignedProjects from './compnent/dashbord/user/AssignedProjects '
 
 
 function App() {
-  
+  const { user, role } = useSelector((state) => state.auth);
 
   return (
     <>
@@ -28,19 +29,19 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
 
-        {/* Dashboard Route */}
         <Route path="/dashboard" element={<AuthGurd><Admindashboard /></AuthGurd>}>
-          <Route index element={<Maindashcontent />} /> {/* Default content */}
-          <Route path="profile" element={<ProfileManagement />} />
+      <Route index element={<Maindashcontent />} />
+      <Route path="profile" element={<ProfileManagement />} />
+      {role === 'admin' && (
+        <>
           <Route path="user-management" element={<UserManagement />} />
-          <Route path="project-management" element={<ProjectManagement />} /> {/* Example of nested route */}
-        </Route>
-
-        {/* You can define the user dashboard similarly */}
-        <Route path='/userdashboard' element={<Userdashboard />} />
-
-        {/* Redirect to home if no route matches */}
-        <Route path='*' element={<Navigate to='/' />} />
+          <Route path="project-management" element={<ProjectManagement />} />
+        </>
+      )}
+    
+      {/* Redirect to home if no route matches */}
+      <Route path='*' element={<Navigate to='/' />} />
+    </Route>
 
       </Routes>
     </>
