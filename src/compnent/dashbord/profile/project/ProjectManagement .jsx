@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Input, notification, Spin, Select } from 'antd';
 import { useFetchUsersQuery } from '../../../api/Getalluserapi';
-import { useFetchProjectsQuery,  useUpdateProjectMutation, useDeleteProjectMutation, useAssignProjectMutation } from '../../../api/projectApi';
+import { useFetchProjectsQuery,  useUpdateProjectMutation, useDeleteProjectMutation, useCreateProjectMutation } from '../../../api/projectApi';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
@@ -24,6 +24,7 @@ const ProjectManagement = () => {
  
   const [updateProject] = useUpdateProjectMutation();
   const [deleteProject] = useDeleteProjectMutation();
+  const [creteproject] = useCreateProjectMutation();
   
   // states page
   const [board, setBoard] = useState(false)
@@ -52,7 +53,7 @@ const ProjectManagement = () => {
   const { user, token } = useSelector((state) => state.auth);
   // Open modal for creating or updating project
 
-  const openModal = (project = null) => {
+  const openModal = (project) => {
     setEditingProject(project);
     setIsModalVisible(true);
     form.setFieldsValue({
@@ -63,8 +64,11 @@ const ProjectManagement = () => {
 
   // Handle create or update project
   const handleCreateOrUpdate = async (values) => {
+    console.log(values)
+  
     try {
       if (editingProject) {
+
 
         const updatedData = {
           name: values.name,
@@ -75,7 +79,8 @@ const ProjectManagement = () => {
         await updateProject({ id: editingProject.id, data: updatedData }).unwrap();
         notification.success({ message: 'Project updated successfully!' });
       } else {
-        await createProject(values).unwrap();
+        alert("asdad")
+        await creteproject(values).unwrap();
         notification.success({ message: 'Project created successfully!' });
       }
       setIsModalVisible(false);
